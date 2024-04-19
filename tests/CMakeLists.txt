@@ -1,0 +1,11 @@
+cmake_minimum_required( VERSION 3.10 )
+enable_testing()
+include_directories( ${CMAKE_SOURCE_DIR} )
+include_directories( ${CMAKE_SOURCE_DIR}/thirdparty/ )
+include_directories( ${CMAKE_SOURCE_DIR}/thirdparty/Catch2/src/ )
+
+add_executable( test_first test_first.cpp )
+add_test( NAME "test_first" COMMAND test_first )
+# target_link_libraries( test_first PUBLIC Catch2::Catch2 )
+# target_link_libraries( test_first PUBLIC Catch2Main )
+target_link_libraries( test_first PUBLIC Catch2::Catch2WithMain )
