@@ -15,7 +15,9 @@ TEST_CASE( "test_node", "[test_node concat]" ) {
 
     const OperatorNode<decltype( ConcatOp )>
         op_node{ std::vector<std::shared_ptr<Node>>{ inode1, inode2 }, ConcatOp } ;
-    REQUIRE( op_node.compute() == "Hello World " );
+    op_node.compute();
+    REQUIRE( op_node.getValue() == "Hello World " );
+
 }
 
 TEST_CASE( "test_node", "[test_node repeat5]" ) {
@@ -43,5 +45,6 @@ TEST_CASE( "test_node", "[test_node repeat5]" ) {
 
     const OperatorNode<decltype( RepeatOp5 )>
         op_node{ std::vector<std::shared_ptr<Node>>{ inode1 }, RepeatOp5 } ;
-    REQUIRE( op_node.compute() == "Hello Hello Hello Hello Hello " );
+    op_node.compute();
+    REQUIRE( op_node.getValue() == "Hello Hello Hello Hello Hello " );
 }

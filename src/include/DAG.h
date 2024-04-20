@@ -13,12 +13,13 @@
 
 namespace StrGraph {
 
-class DAG {
+class DAG: public NodeListener {
 private:
-    std::queue<std::shared_ptr<Node>> mQueue;
+    mutable std::deque<std::shared_ptr<Node>> mQueue;
     std::vector<std::shared_ptr<Node>> mInputNodes;
     std::set<int> mNodeIds;
     std::unordered_map<int, std::shared_ptr<Node>> mNodeMap;
+    std::vector<std::string> mOutput;
 
 public:
     DAG() = default;
@@ -47,9 +48,35 @@ public:
     int addOperatorNode( const std::vector<int>& parent_nodes, const OpType& op ) {
         std::vector<std::shared_ptr<Node>> nodes;
         for( int i : parent_nodes ) {
-            nodes.push_back( mNodeMap[i] );
+            if( mNodeMap.find(i) != mNodeMap.end() )
+                nodes.push_back( mNodeMap[i] );
+            else throw std::runtime_error( "Node not found" );
         }
         return addOperatorNode( nodes, op );
+    }
+
+
+    std::vector<std::string> doCompute() const {
+        std::vector<std::shared_ptr<Node>> last_batch_nodes;
+        std::vector<std::string> last_batch_result;
+        while( !mQueue.empty() ) {
+            last_batch_nodes.clear();
+            last_batch_result.clear();
+            while( !mQueue.empty() ) {
+                auto node = mQueue.front();
+                last_batch_nodes.push_back( node );
+                mQueue.pop_back();
+            }
+            for(auto& node: last_batch_nodes) {
+                node->compute();
+                last_batch_result.push_back( node->getValue() );
+            }
+        }
+        return last_batch_result;
+    }
+
+    virtual void onReady( const std::shared_ptr<Node>& node ) const override {
+        mQueue.push_back( node );
     }
 };
 

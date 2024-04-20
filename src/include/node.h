@@ -11,11 +11,29 @@
 namespace StrGraph {
 
 
-class NodeListener;
+class Node;
+class NodeListener: public std::enable_shared_from_this<NodeListener> {
+    std::vector<std::shared_ptr<Node>> mSub{};
+    
+public:
+    NodeListener() = default;
+    void subscribe( const std::shared_ptr<Node>& listen_on ) ;
 
-class Node {
+    NodeListener( const std::shared_ptr<Node>& listen_on ) {
+        subscribe( listen_on );
+    }
+
+    virtual void onDoneComputing() {}
+    virtual void onReady( const std::shared_ptr<Node>& node ) const {}
+    int getSubCount() const { return mSub.size(); }
+};
+
+
+class Node: public NodeListener, public std::enable_shared_from_this<Node> {
     std::vector<std::shared_ptr<NodeListener>> mListeners;
-    std::string mResult;
+    mutable std::string mResult;
+    int mReadyCount = 0;
+
 public:
     Node() = default;
     Node( const std::string& result ) : mResult(result) {}
@@ -27,30 +45,30 @@ public:
         return mResult;
     }
 
-}; // class Node
-//
-//
-
-class NodeListener : public std::enable_shared_from_this<NodeListener> {
-    std::vector<std::shared_ptr<Node>> mSub{};
-    int mReadyCount = 0;
-    
-public:
-    NodeListener() = default;
-    void subscribe( const std::shared_ptr<Node>& listen_on ) {
-        mSub.push_back(listen_on);
-        mSub.back()->accept( shared_from_this() );
-    }
-    NodeListener( const std::shared_ptr<Node>& listen_on ) {
-        subscribe( listen_on );
+    auto getListeners() const {
+        return mListeners;
     }
 
+    virtual ~Node() {}
 
-    virtual void onNodeComputeFinished() {
+    virtual void setResult( const std::string& res_str ) const {
+        mResult = res_str;
+    }
+
+    virtual void compute() const;
+
+    bool isReady() const {
+        return mReadyCount == getSubCount();
+    }
+
+    void incrementReadyCount() {
         mReadyCount++;
-        // TODO:  add this to mQueue in DAG
     }
-};
+
+    virtual void onDoneComputing() override ;
+
+}; // class Node
+
 
 
 class InputNode: public Node {
@@ -74,15 +92,14 @@ public:
                        []( const auto& input ) { return input->getValue(); });
     }
 
-    std::string compute() const {
-        return mOp( mInputStrs );
+    virtual void compute() const override {
+        setResult(mOp( mInputStrs ));
+        for( auto& listener : getListeners() ) {
+            listener->onDoneComputing();
+        }
     }
 }; // class OperatorNode
 
-
-class OutputNode: public Node {
-public:
-}; // class OutputNode
     
 } // namespace StrGraph
 
