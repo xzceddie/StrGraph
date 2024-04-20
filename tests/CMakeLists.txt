@@ -14,6 +14,10 @@ add_executable( test_node test_node.cpp )
 add_test( NAME "test_node" COMMAND test_node )
 target_link_libraries( test_node PUBLIC Catch2::Catch2WithMain )
 
+add_executable( test_DAG test_DAG.cpp )
+add_test( NAME "test_DAG" COMMAND test_DAG )
+target_link_libraries( test_DAG PUBLIC Catch2::Catch2WithMain )
+
 file(COPY ${CMAKE_SOURCE_DIR}/tests/test_pybind11.py DESTINATION ${CMAKE_BINARY_DIR}/tests/)
 find_package(pybind11 REQUIRED)
 pybind11_add_module(example ./test_pybind11.cpp)

@@ -10,33 +10,63 @@
 
 namespace StrGraph {
 
+
+class NodeListener;
+
 class Node {
+    std::vector<std::shared_ptr<NodeListener>> mListeners;
+    std::string mResult;
 public:
+    Node() = default;
+    Node( const std::string& result ) : mResult(result) {}
+    void accept( const std::shared_ptr<NodeListener>& listener ) {
+        mListeners.push_back( listener );
+    }
+
+    virtual std::string getValue() const {
+        return mResult;
+    }
+
 }; // class Node
+//
+//
+
+class NodeListener : public std::enable_shared_from_this<NodeListener> {
+    std::vector<std::shared_ptr<Node>> mSub{};
+    int mReadyCount = 0;
+    
+public:
+    NodeListener() = default;
+    void subscribe( const std::shared_ptr<Node>& listen_on ) {
+        mSub.push_back(listen_on);
+        mSub.back()->accept( shared_from_this() );
+    }
+    NodeListener( const std::shared_ptr<Node>& listen_on ) {
+        subscribe( listen_on );
+    }
+
+
+    virtual void onNodeComputeFinished() {
+        mReadyCount++;
+        // TODO:  add this to mQueue in DAG
+    }
+};
 
 
 class InputNode: public Node {
-    std::string mContent;
 public:
-    InputNode( const std::string& str )
-    : mContent{ str }{
-    }
-
-    std::string getValue() const {
-        return mContent;
-    }
-
+    InputNode( const std::string& input ) : Node( input ) {}
 }; // class InputNode
 
 
 template <typename OpType>
 class OperatorNode: public Node {
     std::string mOutput;
-    std::vector<std::shared_ptr<InputNode>> mInputs;
+    std::vector<std::shared_ptr<Node>> mInputs;
     std::vector<std::string> mInputStrs;
     OpType mOp;
 public:
-    OperatorNode( const std::vector<std::shared_ptr<InputNode>>& inputs, const OpType& op )
+    OperatorNode( const std::vector<std::shared_ptr<Node>>& inputs, const OpType& op )
     : mInputs{ inputs }
     , mOp( op ) {
         std::transform( mInputs.begin(), mInputs.end(), 
@@ -51,11 +81,7 @@ public:
 
 
 class OutputNode: public Node {
-    std::string mContent;
 public:
-    std::string getValue() const {
-        return mContent;
-    }
 }; // class OutputNode
     
 } // namespace StrGraph
