@@ -22,4 +22,58 @@ PYBIND11_MODULE(pyStrGraph, m) {
         .def( "addOperatorNode", &StrGraph::DAG::addOperatorNodeById )
         .def( "doCompute", &StrGraph::DAG::doCompute, py::call_guard<py::gil_scoped_release>() )
     ;
+
+    py::class_<StrGraph::ConcatOperator>( m, "ConcatOperator" )
+        .def( py::init<const std::string&>() )
+        .def( "__call__", &StrGraph::ConcatOperator::operator() )
+        .def_property_readonly_static("__doc__",
+            [](py::object /* self */) {
+                return "Concatenate input strings, pass in a delimiter string to represent the delimiter";
+            })
+    ;
+
+    py::class_<StrGraph::RepeatOperator>( m, "RepeatOperator" )
+        .def( py::init<const int, const std::string&>() )
+        .def( "__call__", &StrGraph::RepeatOperator::operator() )
+        .def_property_readonly_static("__doc__",
+            [](py::object /* self */) {
+                return "Repeat input strings for given times, pass in (times, delimiter)";
+            })
+    ;
+
+    py::class_<StrGraph::ToUpperOperator>( m, "ToUpperOperator" )
+        .def( py::init<>() )
+        .def( "__call__", &StrGraph::ToUpperOperator::operator() )
+        .def_property_readonly_static("__doc__",
+            [](py::object /* self */) {
+                return "Make the input string all upper case";
+            })
+    ;
+
+    py::class_<StrGraph::ToLowerOperator>( m, "ToLowerOperator" )
+        .def( py::init<>() )
+        .def( "__call__", &StrGraph::ToLowerOperator::operator() )
+        .def_property_readonly_static("__doc__",
+            [](py::object /* self */) {
+                return "Make the input string all lower case";
+            })
+    ;
+
+    py::class_<StrGraph::InsertOperator>( m, "InsertOperator" )
+        .def( py::init<const int, const std::string& >() )
+        .def( "__call__", &StrGraph::InsertOperator::operator() )
+        .def_property_readonly_static("__doc__",
+            [](py::object /* self */) {
+                return "Insert delimiters into the original string at evenly spaced indices, pass in (interval, delimiter)";
+            })
+    ;
+    
+    py::class_<StrGraph::RotateOperator>( m, "RotateOperator" )
+        .def( py::init<const int>() )
+        .def( "__call__", &StrGraph::RotateOperator::operator() )
+        .def_property_readonly_static("__doc__",
+            [](py::object /* self */) {
+                return "Rotate the string to the right (positive) or left (negative) by the given amount";
+            })
+    ;
 }
