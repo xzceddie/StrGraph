@@ -7,13 +7,15 @@
 #include <vector>
 #include <array>
 #include <memory>
+#include <iostream>
 
 namespace StrGraph {
 
 
 class Node;
 class NodeListener: public std::enable_shared_from_this<NodeListener> {
-    std::vector<std::shared_ptr<Node>> mSub{};
+    // std::vector<std::shared_ptr<Node>> mSub{};
+    int mSubCount = 0;
     
 public:
     NodeListener() = default;
@@ -25,7 +27,7 @@ public:
 
     virtual void onDoneComputing() {}
     virtual void onReady( const std::shared_ptr<Node>& node ) const {}
-    int getSubCount() const { return mSub.size(); }
+    int getSubCount() const { return mSubCount; }
 };
 
 
@@ -80,20 +82,37 @@ public:
 template <typename OpType>
 class OperatorNode: public Node {
     std::string mOutput;
-    std::vector<std::shared_ptr<Node>> mInputs;
-    std::vector<std::string> mInputStrs;
+    std::vector<std::weak_ptr<Node>> mInputs;
+    mutable std::vector<std::string> mInputStrs;
     OpType mOp;
+
 public:
     OperatorNode( const std::vector<std::shared_ptr<Node>>& inputs, const OpType& op )
-    : mInputs{ inputs }
-    , mOp( op ) {
-        std::transform( mInputs.begin(), mInputs.end(), 
+    //  mInputs{ inputs }
+    : mOp( op ) {
+        for( auto& node : inputs ) {
+            mInputs.push_back( node );
+        }
+        std::transform( inputs.begin(), inputs.end(), 
                        std::back_inserter( mInputStrs ),
                        []( const auto& input ) { return input->getValue(); });
     }
 
     virtual void compute() const override {
+        std::vector<std::shared_ptr<Node>> tmp_parents;
+        for( auto& input : mInputs ) {
+            if( auto p = input.lock() ) {
+                tmp_parents.push_back( p );
+            } else {
+                throw std::runtime_error( "Node not found" );
+            }
+        }
+        mInputStrs.clear();
+        std::transform( tmp_parents.begin(), tmp_parents.end(),
+                       std::back_inserter( mInputStrs ),
+                       []( const auto& input ) { return input->getValue(); });
         setResult(mOp( mInputStrs ));
+        std::cout << "Result: " << getValue() << std::endl;
         for( auto& listener : getListeners() ) {
             listener->onDoneComputing();
         }

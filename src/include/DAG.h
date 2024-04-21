@@ -9,6 +9,7 @@
 #include <set>
 #include <unordered_map>
 #include <src/include/node.h>
+#include <iostream>
 
 
 namespace StrGraph {
@@ -29,7 +30,12 @@ public:
         for( int i = 0; i < input_nodes.size(); i++ ) {
             mNodeIds.insert( i );
             mNodeMap[i] = input_nodes[i];
+            mQueue.push_back( input_nodes[i] );
         }
+        // std::cout << "On constructing DAG: \n";
+        // for( auto& node : mInputNodes ) {
+        //     std::cout << "Node: " << node->getValue() << std::endl;
+        // }
     }
 
     std::vector<std::shared_ptr<Node>> getInputs() const {
@@ -41,6 +47,9 @@ public:
         int id = mNodeIds.size();
         mNodeIds.insert( id );
         mNodeMap[id] = std::make_shared<OperatorNode<OpType>>( parent_nodes, op );
+        for(auto& ele: parent_nodes) {
+            mNodeMap[id]->subscribe( ele );
+        }
         return id;
     }
 
@@ -70,6 +79,9 @@ public:
             for(auto& node: last_batch_nodes) {
                 node->compute();
                 last_batch_result.push_back( node->getValue() );
+                for(const auto& ele: last_batch_result) {
+                    std::cout << ele << std::endl;
+                }
             }
         }
         return last_batch_result;

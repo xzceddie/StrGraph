@@ -3,8 +3,8 @@
 
 
 void StrGraph::NodeListener::subscribe( const std::shared_ptr<StrGraph::Node>& listen_on ) {
-    mSub.push_back(listen_on);
-    mSub.back()->accept( shared_from_this() );
+    mSubCount++;
+    listen_on->accept( shared_from_this() );
 }
 
 
