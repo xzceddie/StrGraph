@@ -5,6 +5,7 @@
 #include <functional>
 #include <iostream>
 #include <string>
+#include <src/include/operators.h>
 
 namespace py = pybind11;
 
