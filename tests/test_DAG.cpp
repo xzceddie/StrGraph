@@ -129,3 +129,19 @@ TEST_CASE( "test_dag", "[test_rotate_operator]" ) {
     REQUIRE( res.front() == "worldhelloworldhelloworldhello" );
     REQUIRE( res2.front() == "worldhelloworldhelloworldhello" );
 }
+
+TEST_CASE( "test_dag", "[test_rotate_operator_2]" ) {
+    const std::string input1 = "helloworldhelloworldhelloworld";
+    const std::shared_ptr<Node> inode1 = std::make_shared<InputNode>( input1 );
+
+    const auto concat_op = RotateOperator( 5 );
+    DAG dag{ std::vector<std::shared_ptr<Node>>{ inode1 } };
+
+    const auto new_node_id = dag.addOperatorNode( std::vector<int>{ 0 }, concat_op );
+
+    const auto res = dag.doCompute();
+    dag.touch();
+    auto res2 = dag.doCompute( true ); // indempotence && multithread
+    REQUIRE( res.front() == "worldhelloworldhelloworldhello" );
+    REQUIRE( res2.front() == "worldhelloworldhelloworldhello" );
+}
