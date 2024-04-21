@@ -8,31 +8,11 @@
 #include <array>
 #include <memory>
 #include <iostream>
+#include <src/include/node_listener.h>
 
 namespace StrGraph {
 
-
-class Node;
-class NodeListener: public std::enable_shared_from_this<NodeListener> {
-    // std::vector<std::shared_ptr<Node>> mSub{};
-    int mSubCount = 0;
-    
-public:
-    NodeListener() = default;
-    void subscribe( const std::shared_ptr<Node>& listen_on ) ;
-
-    NodeListener( const std::shared_ptr<Node>& listen_on ) {
-        subscribe( listen_on );
-    }
-
-    virtual void onDoneComputing() {}
-    // virtual void onReady( const std::shared_ptr<Node>& node ) const {}
-    virtual void onReady( Node* node ) const {}
-    int getSubCount() const { return mSubCount; }
-};
-
-
-class Node: public NodeListener, public std::enable_shared_from_this<Node> {
+class Node: public NodeListener {
     // std::vector<std::shared_ptr<NodeListener>> mListeners;
     std::vector<NodeListener*> mListeners;
     mutable std::string mResult;
@@ -93,7 +73,6 @@ class OperatorNode: public Node {
 
 public:
     OperatorNode( const std::vector<std::shared_ptr<Node>>& inputs, const OpType& op )
-    //  mInputs{ inputs }
     : mOp( op ) {
         for( auto& node : inputs ) {
             mInputs.push_back( node );
@@ -117,7 +96,6 @@ public:
                        std::back_inserter( mInputStrs ),
                        []( const auto& input ) { return input->getValue(); });
         setResult(mOp( mInputStrs ));
-        // std::cout << "Result: " << getValue() << std::endl;
         for( auto& listener : getListeners() ) {
             listener->onDoneComputing();
         }

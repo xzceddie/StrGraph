@@ -16,7 +16,6 @@ namespace StrGraph {
 
 class DAG: public NodeListener {
 private:
-    // mutable std::deque<std::shared_ptr<Node>> mQueue;
     mutable std::deque<Node*> mQueue;
     std::vector<std::shared_ptr<Node>> mInputNodes;
     std::set<int> mNodeIds;
