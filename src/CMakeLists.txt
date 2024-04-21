@@ -6,3 +6,4 @@ add_library( node STATIC node.cpp )
 
 find_package(pybind11 REQUIRED)
 pybind11_add_module(pyStrGraph pyStrGraph.cpp)
+target_link_libraries( pyStrGraph PUBLIC node )
