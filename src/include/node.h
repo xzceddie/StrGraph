@@ -12,8 +12,8 @@
 
 namespace StrGraph {
 
+// Node can listen to other nodes;
 class Node: public NodeListener {
-    // std::vector<std::shared_ptr<NodeListener>> mListeners;
     std::vector<NodeListener*> mListeners;
     mutable std::string mResult;
     int mReadyCount = 0;
@@ -58,6 +58,7 @@ public:
 
 
 
+// InputNodes on only contains a string as the data
 class InputNode: public Node {
 public:
     InputNode( const std::string& input ) : Node( input ) {}
@@ -77,9 +78,9 @@ public:
         for( auto& node : inputs ) {
             mInputs.push_back( node );
         }
-        std::transform( inputs.begin(), inputs.end(), 
-                       std::back_inserter( mInputStrs ),
-                       []( const auto& input ) { return input->getValue(); });
+        // std::transform( inputs.begin(), inputs.end(), 
+        //                std::back_inserter( mInputStrs ),
+        //                []( const auto& input ) { return input->getValue(); });
     }
 
     virtual void compute() const override {
@@ -88,10 +89,10 @@ public:
             if( auto p = input.lock() ) {
                 tmp_parents.push_back( p );
             } else {
-                throw std::runtime_error( "Node not found" );
+                throw std::runtime_error( "Parent Node not found" );
             }
         }
-        mInputStrs.clear();
+        // mInputStrs.clear();
         std::transform( tmp_parents.begin(), tmp_parents.end(),
                        std::back_inserter( mInputStrs ),
                        []( const auto& input ) { return input->getValue(); });
