@@ -1,7 +1,6 @@
 #ifndef DAG_H
 #define DAG_H
 
-#include <__tuple_dir/tuple_element.h>
 #include <vector>
 #include <string>
 #include <memory>
@@ -10,36 +9,52 @@
 #include <unordered_map>
 #include <src/include/node.h>
 #include <iostream>
-
+#include <thread>
 
 namespace StrGraph {
 
 class DAG: public NodeListener {
 private:
+    mutable bool mDirty;
     mutable std::deque<Node*> mQueue;
     std::vector<std::shared_ptr<Node>> mInputNodes;
     std::set<int> mNodeIds;
     std::unordered_map<int, std::shared_ptr<Node>> mNodeMap;
-    std::vector<std::string> mOutput;
+    mutable std::vector<std::string> mOutput;
 
 public:
     DAG() = default;
 
     DAG( const std::vector<std::shared_ptr<Node>>& input_nodes )
-    : mInputNodes{ input_nodes } {
+    : mDirty{ true }
+    , mInputNodes{ input_nodes } {
         for( int i = 0; i < input_nodes.size(); i++ ) {
             mNodeIds.insert( i );
             mNodeMap[i] = input_nodes[i];
             mQueue.push_back( input_nodes[i].get() );
         }
-        // std::cout << "On constructing DAG: \n";
-        // for( auto& node : mInputNodes ) {
-        //     std::cout << "Node: " << node->getValue() << std::endl;
-        // }
     }
+
 
     std::vector<std::shared_ptr<Node>> getInputs() const {
         return mInputNodes;
+    }
+
+    // mark dirty
+    void touch() {
+        mDirty = true;
+        for(auto& [nodeId, node]: mNodeMap) {
+            node -> resetReadyCount();
+        }
+    }
+
+    void markDirty() { // alias
+        touch();
+    }
+
+    void resetInputContent( const int node_id, const std::string& new_content ) {
+        mInputNodes[node_id]->setResult( new_content );
+        touch();
     }
 
     // template<typename OpType>
@@ -66,27 +81,49 @@ public:
     }
 
 
-    std::vector<std::string> doCompute() const {
-        // std::vector<std::shared_ptr<Node>> last_batch_nodes;
-        std::vector<Node*> last_batch_nodes;
-        std::vector<std::string> last_batch_result;
-        while( !mQueue.empty() ) {
-            last_batch_nodes.clear();
-            last_batch_result.clear();
+    std::vector<std::string> doCompute(const bool use_multi_thread = false) const {
+        if( !mDirty ) {
+            return mOutput;
+        } else { 
+            if( mQueue.empty() ) {
+                std::cout << "HERE WE GO\n";
+                for(auto& node: mInputNodes) {
+                    mQueue.push_back(node.get());
+                }
+            }
+            std::vector<Node*> last_batch_nodes;
+            std::vector<std::string> last_batch_result;
             while( !mQueue.empty() ) {
-                auto node = mQueue.front();
-                last_batch_nodes.push_back( node );
-                mQueue.pop_front();
+                last_batch_nodes.clear();
+                last_batch_result.clear();
+                while( !mQueue.empty() ) {
+                    auto node = mQueue.front();
+                    last_batch_nodes.push_back( node );
+                    mQueue.pop_front();
+                }
+                if (!use_multi_thread) {
+                    for(auto& node: last_batch_nodes) {
+                        node->compute();
+                        last_batch_result.push_back( node->getValue() );
+                    }
+                } else {
+                    std::vector<std::thread> last_batch_threads;
+                    // std::cout << "I am doing multithreading\n";
+                    for(auto& node: last_batch_nodes) {
+                        std::thread t([&node](){ node->compute();});
+                        last_batch_threads.push_back(std::move(t));
+                    }
+                    for( auto& t : last_batch_threads ) {
+                        t.join();
+                    }
+                    for( auto& node : last_batch_nodes ) {
+                        last_batch_result.push_back( node->getValue() );
+                    }
+                }
             }
-            for(auto& node: last_batch_nodes) {
-                node->compute();
-                last_batch_result.push_back( node->getValue() );
-                // for(const auto& ele: last_batch_result) {
-                //     std::cout << ele << std::endl;
-                // }
-            }
+            mDirty = false;
+            return mOutput = last_batch_result;
         }
-        return last_batch_result;
     }
 
     // virtual void onReady( const std::shared_ptr<Node>& node ) const override {

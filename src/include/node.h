@@ -55,6 +55,10 @@ public:
         mReadyCount++;
     }
 
+    void resetReadyCount() {
+        mReadyCount = 0;
+    }
+
     virtual void onDoneComputing() override ;
 
 }; // class Node
@@ -96,7 +100,8 @@ public:
                 throw std::runtime_error( "Parent Node not found" );
             }
         }
-        // mInputStrs.clear();
+
+        mInputStrs.clear();
         std::transform( tmp_parents.begin(), tmp_parents.end(),
                        std::back_inserter( mInputStrs ),
                        []( const auto& input ) { return input->getValue(); });

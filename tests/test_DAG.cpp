@@ -21,8 +21,11 @@ TEST_CASE( "test_DAG", "[test_concat_repeat_operators]" ) {
     const auto new_node_id = dag.addOperatorNode( dag.getInputs(), concat_op );
     const auto new_node_id2 = dag.addOperatorNode( std::vector<int>{ new_node_id }, repeat_op );
 
-    const auto res = dag.doCompute();
+    auto res = dag.doCompute();
+    dag.touch();
+    auto res2 = dag.doCompute( true ); // indempotence
     REQUIRE( res.front() == "Hello World | Hello World | Hello World | Hello World | Hello World" );
+    REQUIRE( res2.front() == "Hello World | Hello World | Hello World | Hello World | Hello World" );
 }
 
 TEST_CASE( "test_DAG", "[test_concat_repeat_operators2]" ) {
@@ -44,7 +47,10 @@ TEST_CASE( "test_DAG", "[test_concat_repeat_operators2]" ) {
     const auto new_node_id3 = dag.addOperatorNode( std::vector<int>{ new_node_id, new_node_id2 }, concat_op );
 
     const auto res = dag.doCompute();
+    dag.touch();
+    auto res2 = dag.doCompute( true ); // indempotence && multithread
     REQUIRE( res.front() == "Hello World StrGraph PythonCpp" );
+    REQUIRE( res2.front() == "Hello World StrGraph PythonCpp" );
 }
 
 TEST_CASE( "test_DAG", "[test_toupper_operator]" ) {
@@ -64,9 +70,10 @@ TEST_CASE( "test_DAG", "[test_toupper_operator]" ) {
 
 
     const auto res = dag.doCompute();
-    // REQUIRE( res.front() == "HELLO" );
-    // REQUIRE( res.back() == "WORLD" );
+    dag.touch();
+    auto res2 = dag.doCompute( true ); // indempotence && multithread
     REQUIRE( res.front() == "HELLO world" );
+    REQUIRE( res2.front() == "HELLO world" );
 }
 
 TEST_CASE( "test_DAG", "[test_tolower_operator]" ) {
@@ -85,7 +92,10 @@ TEST_CASE( "test_DAG", "[test_tolower_operator]" ) {
 
 
     const auto res = dag.doCompute();
+    dag.touch();
+    auto res2 = dag.doCompute( true ); // indempotence && multithread
     REQUIRE( res.front() == "hello WORLD" );
+    REQUIRE( res2.front() == "hello WORLD" );
 }
 
 TEST_CASE( "test_dag", "[test_insert_operator]" ) {
@@ -97,9 +107,11 @@ TEST_CASE( "test_dag", "[test_insert_operator]" ) {
 
     const auto new_node_id = dag.addOperatorNode( std::vector<int>{ 0 }, concat_op );
 
-
     const auto res = dag.doCompute();
+    dag.touch();
+    auto res2 = dag.doCompute( true ); // indempotence && multithread
     REQUIRE( res.front() == "hello world hello world hello world" );
+    REQUIRE( res2.front() == "hello world hello world hello world" );
 }
 
 TEST_CASE( "test_dag", "[test_rotate_operator]" ) {
@@ -111,7 +123,9 @@ TEST_CASE( "test_dag", "[test_rotate_operator]" ) {
 
     const auto new_node_id = dag.addOperatorNode( std::vector<int>{ 0 }, concat_op );
 
-
     const auto res = dag.doCompute();
+    dag.touch();
+    auto res2 = dag.doCompute( true ); // indempotence && multithread
     REQUIRE( res.front() == "worldhelloworldhelloworldhello" );
+    REQUIRE( res2.front() == "worldhelloworldhelloworldhello" );
 }
