@@ -26,8 +26,10 @@ class MyModuleTestCase(unittest.TestCase):
     
     def test_callback_vecstring( self ):
         res_str = example.process_strings( compose_string )
-        # print(f"res_str: {res_str}")
         self.assertEqual( res_str, "Hello World from C++" )
+
+    def test_callback_vecstring_class( self ):
+        example.MyClass( ["Hello", "World", "from", "C++"] ).printValues()
 
 if __name__ == '__main__':
     unittest.main()

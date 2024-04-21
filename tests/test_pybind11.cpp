@@ -42,6 +42,21 @@ std::string processStrings(const CallBackStrVec& callback) {
     return callback(strings);
 }
 
+class MyClass {
+public:
+    MyClass(const std::vector<std::string>& values) : values_(values) {}
+
+    void printValues() const {
+        for (const auto& value : values_) {
+            std::cout << value << " -> ";
+        }
+        std::cout << std::endl;
+    }
+
+private:
+    std::vector<std::string> values_;
+};
+
 PYBIND11_MODULE(example, m) {
     m.doc() = "pybind11 example plugin"; // optional module docstring
     m.def("add", &add, "A function that adds two numbers");
@@ -52,7 +67,10 @@ PYBIND11_MODULE(example, m) {
         .def("setCallback", &MyInterface::setCallback)
         .def("performOperation", &MyInterface::performOperation);
 
-
     m.def("process_strings", &processStrings, "Function that accepts a call back function to process strings");
+
+    py::class_<MyClass>(m, "MyClass")
+        .def(py::init<const std::vector<std::string>&>())
+        .def("printValues", &MyClass::printValues);
 }
 
