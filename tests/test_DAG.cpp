@@ -114,10 +114,10 @@ TEST_CASE( "test_dag", "[test_rotate_operator]" ) {
     const std::string input1 = "helloworldhelloworldhelloworld";
     // const std::shared_ptr<Node> inode1 = std::make_shared<InputNode>( input1 );
 
-    const auto concat_op = RotateOperator( -5 );
+    const auto op = RotateOperator( -5 );
     DAG dag{ std::vector<std::string>{ input1 } };
 
-    const auto new_node_id = dag.addOperatorNodeById( std::vector<int>{ 0 }, concat_op );
+    const auto new_node_id = dag.addOperatorNodeById( std::vector<int>{ 0 }, op );
 
     const auto res = dag.doCompute();
     dag.touch();
@@ -130,10 +130,10 @@ TEST_CASE( "test_dag", "[test_rotate_operator_2]" ) {
     const std::string input1 = "helloworldhelloworldhelloworld";
     // const std::shared_ptr<Node> inode1 = std::make_shared<InputNode>( input1 );
 
-    const auto concat_op = RotateOperator( 5 );
+    const auto op = RotateOperator( 5 );
     DAG dag{ std::vector<std::string>{ input1 } };
 
-    const auto new_node_id = dag.addOperatorNodeById( std::vector<int>{ 0 }, concat_op );
+    const auto new_node_id = dag.addOperatorNodeById( std::vector<int>{ 0 }, op );
 
     const auto res = dag.doCompute();
     dag.touch();
@@ -141,3 +141,52 @@ TEST_CASE( "test_dag", "[test_rotate_operator_2]" ) {
     REQUIRE( res.front() == "worldhelloworldhelloworldhello" );
     REQUIRE( res2.front() == "worldhelloworldhelloworldhello" );
 }
+
+/*
+    More sophisticated test cases
+*/
+TEST_CASE( "test_dag", "[test_complex1]" ) {
+    const std::string input1 = "hello";
+    const std::string input2 = "world";
+    const std::string input3 = "Str";
+    const std::string input4 = "Graph";
+
+    const auto concat_op = ConcatOperator( " " );
+    const auto repeat_op = RepeatOperator( 2, " | " );
+    const auto insert_op = InsertOperator( 3, " <=> " );
+    DAG dag{ std::vector<std::string>{ input1, input2, input3, input4 } };
+
+    const auto concated_id = dag.addOperatorNodeById( std::vector<int>{ 0, 1 }, concat_op );
+    const auto repeated_id = dag.addOperatorNodeById( std::vector<int>{ 2 }, repeat_op );
+    const auto concated_id_1 = dag.addOperatorNodeById( std::vector<int>{ concated_id, repeated_id, 3 }, concat_op );
+    const auto final_id = dag.addOperatorNodeById( std::vector<int>{ concated_id_1 }, insert_op );
+
+    const auto res = dag.doCompute();
+    dag.touch();
+    auto res2 = dag.doCompute( true ); // indempotence && multithread
+    REQUIRE( res.front() == "hel <=> lo  <=> wor <=> ld  <=> Str <=>  |  <=> Str <=>  Gr <=> aph" );
+    REQUIRE( res2.front() == "hel <=> lo  <=> wor <=> ld  <=> Str <=>  |  <=> Str <=>  Gr <=> aph" );
+}
+
+// TEST_CASE( "test_dag", "[test_complex2]" ) {
+//     const std::string input1 = "a";
+//     const std::string input2 = "b";
+//     const std::string input3 = "c";
+//     const std::string input4 = "d";
+
+//     const auto concat_op = ConcatOperator( " " );
+//     const auto repeat_op = RepeatOperator( 2, " | " );
+//     const auto insert_op = InsertOperator( 3, " <=> " );
+//     DAG dag{ std::vector<std::string>{ input1, input2, input3, input4 } };
+
+//     const auto concated_id = dag.addOperatorNodeById( std::vector<int>{ 0, 1 }, concat_op );
+//     const auto repeated_id = dag.addOperatorNodeById( std::vector<int>{ 2 }, repeat_op );
+//     const auto concated_id_1 = dag.addOperatorNodeById( std::vector<int>{ concated_id, repeated_id, 3 }, concat_op );
+//     const auto final_id = dag.addOperatorNodeById( std::vector<int>{ concated_id_1 }, insert_op );
+
+//     const auto res = dag.doCompute();
+//     dag.touch();
+//     auto res2 = dag.doCompute( true ); // indempotence && multithread
+//     REQUIRE( res.front() == "hel <=> lo  <=> wor <=> ld  <=> Str <=>  |  <=> Str <=>  Gr <=> aph" );
+//     REQUIRE( res2.front() == "hel <=> lo  <=> wor <=> ld  <=> Str <=>  |  <=> Str <=>  Gr <=> aph" );
+// }
