@@ -69,6 +69,25 @@ TEST_CASE( "test_DAG", "[test_toupper_operator]" ) {
     REQUIRE( res.front() == "HELLO world" );
 }
 
+TEST_CASE( "test_DAG", "[test_tolower_operator]" ) {
+    const std::string input1 = "HELLO";
+    const std::string input2 = "WORLD";
+
+    const std::shared_ptr<Node> inode1 = std::make_shared<InputNode>( input1 );
+    const std::shared_ptr<Node> inode2 = std::make_shared<InputNode>( input2 );
+
+    const auto tolower = ToLowerOperator();
+    const auto concat_op = ConcatOperator( " " );
+    DAG dag{ std::vector<std::shared_ptr<Node>>{ inode1, inode2 } };
+
+    const auto new_node_id = dag.addOperatorNode( std::vector<int>{ 0 }, tolower );
+    const auto new_node_id3 = dag.addOperatorNode( std::vector<int>{ new_node_id, 1 }, concat_op );
+
+
+    const auto res = dag.doCompute();
+    REQUIRE( res.front() == "hello WORLD" );
+}
+
 TEST_CASE( "test_dag", "[test_insert_operator]" ) {
     const std::string input1 = "helloworldhelloworldhelloworld";
     const std::shared_ptr<Node> inode1 = std::make_shared<InputNode>( input1 );

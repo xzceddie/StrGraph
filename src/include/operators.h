@@ -72,6 +72,18 @@ public:
     }
 }; // class ToUpperOperator
 
+class ToLowerOperator {
+public:
+    std::string operator()( const std::vector<std::string>& inputs ) {
+        assert( inputs.size() == 1 );
+        std::string res = inputs.front();
+        for(auto& c : res) {
+            c = tolower(c);
+        }
+        return res;
+    }
+}; // class ToLowerOperator
+
 
 class InsertOperator {
     std::string mDelim;
