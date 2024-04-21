@@ -26,13 +26,15 @@ public:
     }
 
     virtual void onDoneComputing() {}
-    virtual void onReady( const std::shared_ptr<Node>& node ) const {}
+    // virtual void onReady( const std::shared_ptr<Node>& node ) const {}
+    virtual void onReady( Node* node ) const {}
     int getSubCount() const { return mSubCount; }
 };
 
 
 class Node: public NodeListener, public std::enable_shared_from_this<Node> {
-    std::vector<std::shared_ptr<NodeListener>> mListeners;
+    // std::vector<std::shared_ptr<NodeListener>> mListeners;
+    std::vector<NodeListener*> mListeners;
     mutable std::string mResult;
     int mReadyCount = 0;
 
@@ -40,6 +42,9 @@ public:
     Node() = default;
     Node( const std::string& result ) : mResult(result) {}
     void accept( const std::shared_ptr<NodeListener>& listener ) {
+        mListeners.push_back( listener.get() );
+    }
+    void accept( NodeListener* const listener ) {
         mListeners.push_back( listener );
     }
 
@@ -112,7 +117,7 @@ public:
                        std::back_inserter( mInputStrs ),
                        []( const auto& input ) { return input->getValue(); });
         setResult(mOp( mInputStrs ));
-        std::cout << "Result: " << getValue() << std::endl;
+        // std::cout << "Result: " << getValue() << std::endl;
         for( auto& listener : getListeners() ) {
             listener->onDoneComputing();
         }

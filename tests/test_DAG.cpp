@@ -41,10 +41,10 @@ TEST_CASE( "test_DAG", "[simple]" ) {
     const auto new_node_id2 = dag.addOperatorNode( std::vector<int>{ new_node_id }, RepeatOp5 );
 
     const auto res = dag.doCompute();
-    std::cout << "DAG result: \n";
-    for(auto& ele: res) {
-        std::cout << ele << std::endl;
-    }
-    // REQUIRE( op_node.compute() == "Hello World " );
+    // std::cout << "DAG result: \n";
+    // for(auto& ele: res) {
+    //     std::cout << ele << std::endl;
+    // }
+    REQUIRE( res.front() == "Hello World Hello World Hello World Hello World Hello World " );
 }
 

@@ -16,7 +16,8 @@ namespace StrGraph {
 
 class DAG: public NodeListener {
 private:
-    mutable std::deque<std::shared_ptr<Node>> mQueue;
+    // mutable std::deque<std::shared_ptr<Node>> mQueue;
+    mutable std::deque<Node*> mQueue;
     std::vector<std::shared_ptr<Node>> mInputNodes;
     std::set<int> mNodeIds;
     std::unordered_map<int, std::shared_ptr<Node>> mNodeMap;
@@ -30,7 +31,7 @@ public:
         for( int i = 0; i < input_nodes.size(); i++ ) {
             mNodeIds.insert( i );
             mNodeMap[i] = input_nodes[i];
-            mQueue.push_back( input_nodes[i] );
+            mQueue.push_back( input_nodes[i].get() );
         }
         // std::cout << "On constructing DAG: \n";
         // for( auto& node : mInputNodes ) {
@@ -50,6 +51,7 @@ public:
         for(auto& ele: parent_nodes) {
             mNodeMap[id]->subscribe( ele );
         }
+        subscribe(mNodeMap[id]);
         return id;
     }
 
@@ -66,7 +68,8 @@ public:
 
 
     std::vector<std::string> doCompute() const {
-        std::vector<std::shared_ptr<Node>> last_batch_nodes;
+        // std::vector<std::shared_ptr<Node>> last_batch_nodes;
+        std::vector<Node*> last_batch_nodes;
         std::vector<std::string> last_batch_result;
         while( !mQueue.empty() ) {
             last_batch_nodes.clear();
@@ -74,20 +77,21 @@ public:
             while( !mQueue.empty() ) {
                 auto node = mQueue.front();
                 last_batch_nodes.push_back( node );
-                mQueue.pop_back();
+                mQueue.pop_front();
             }
             for(auto& node: last_batch_nodes) {
                 node->compute();
                 last_batch_result.push_back( node->getValue() );
-                for(const auto& ele: last_batch_result) {
-                    std::cout << ele << std::endl;
-                }
+                // for(const auto& ele: last_batch_result) {
+                //     std::cout << ele << std::endl;
+                // }
             }
         }
         return last_batch_result;
     }
 
-    virtual void onReady( const std::shared_ptr<Node>& node ) const override {
+    // virtual void onReady( const std::shared_ptr<Node>& node ) const override {
+    virtual void onReady( Node* node ) const override {
         mQueue.push_back( node );
     }
 };

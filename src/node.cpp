@@ -4,7 +4,7 @@
 
 void StrGraph::NodeListener::subscribe( const std::shared_ptr<StrGraph::Node>& listen_on ) {
     mSubCount++;
-    listen_on->accept( shared_from_this() );
+    listen_on->accept( this );
 }
 
 
@@ -18,7 +18,7 @@ void StrGraph::Node::onDoneComputing() {
     incrementReadyCount();
     if( isReady() ) {
         for( auto& listener : mListeners ) {
-            listener->onReady( std::enable_shared_from_this<StrGraph::Node>::shared_from_this() );
+            listener->onReady( this );
         } 
     }
 }
