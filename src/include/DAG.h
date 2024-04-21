@@ -10,6 +10,7 @@
 #include <src/include/node.h>
 #include <iostream>
 #include <thread>
+#include <utility>
 
 namespace StrGraph {
 
@@ -19,8 +20,10 @@ private:
     mutable std::deque<Node*> mQueue;
     std::vector<std::shared_ptr<Node>> mInputNodes;
     std::set<int> mNodeIds;
-    std::unordered_map<int, std::shared_ptr<Node>> mNodeMap;
+    std::unordered_map<int, std::shared_ptr<Node>> mNodeMap;        // id -> node
+    std::unordered_map<Node*, int> mInverseNodeMap; // node -> id
     mutable std::vector<std::string> mOutput;
+    mutable std::vector<std::pair<int, std::string>> mOutputInfo;
 
 public:
     // DAG() = default;
@@ -42,6 +45,7 @@ public:
             mNodeIds.insert( i );
             mNodeMap[i] = std::make_shared<Node>( input_strings[i] );
             mInputNodes.push_back( mNodeMap[i] );
+            mInverseNodeMap[mNodeMap[i].get()] = i;
             mQueue.push_back( mNodeMap[i].get() );
         }
     }
@@ -68,6 +72,11 @@ public:
         touch();
     }
 
+    // if is integrated, can query the result of any node
+    bool isIntegrated() const {
+        return !mDirty;
+    }
+
     void resetInputContent( const int node_id, const std::string& new_content ) {
         mInputNodes[node_id]->setResult( new_content );
         touch();
@@ -78,6 +87,7 @@ public:
         int id = mNodeIds.size();
         mNodeIds.insert( id );
         mNodeMap[id] = std::make_shared<OperatorNode>( parent_nodes, op );
+        mInverseNodeMap[mNodeMap[id].get()] = id;
         for(auto& ele: parent_nodes) {
             mNodeMap[id]->subscribe( ele );
         }
@@ -98,50 +108,57 @@ public:
 
 
     std::vector<std::string> doCompute(const bool use_multi_thread = false) const {
-        if( !mDirty ) {
+        if( !mDirty )
             return mOutput;
-        } else { 
-            if( mQueue.empty() ) {
-                for(auto& node: mInputNodes) {
-                    mQueue.push_back(node.get());
-                }
+
+        if( mQueue.empty() ) {
+            for(auto& node: mInputNodes) {
+                mQueue.push_back(node.get());
             }
-            std::vector<Node*> last_batch_nodes;
-            std::vector<std::string> last_batch_result;
-            while( !mQueue.empty() ) {
-                last_batch_nodes.clear();
-                last_batch_result.clear();
-                while( !mQueue.empty() ) {
-                    auto node = mQueue.front();
-                    last_batch_nodes.push_back( node );
-                    mQueue.pop_front();
-                }
-                if (!use_multi_thread) {
-                    for(auto& node: last_batch_nodes) {
-                        node->compute();
-                        last_batch_result.push_back( node->getValue() );
-                    }
-                } else {
-                    std::vector<std::thread> last_batch_threads;
-                    // std::cout << "I am doing multithreading\n";
-                    for(auto& node: last_batch_nodes) {
-                        std::thread t([&node](){ node->compute();});
-                        last_batch_threads.push_back(std::move(t));
-                    }
-                    for( auto& t : last_batch_threads ) {
-                        t.join();
-                    }
-                    for( auto& node : last_batch_nodes ) {
-                        last_batch_result.push_back( node->getValue() );
-                    }
-                }
-            }
-            mDirty = false;
-            return mOutput = last_batch_result;
         }
+        std::vector<Node*> last_batch_nodes;
+        std::vector<std::string> last_batch_result;
+        while( !mQueue.empty() ) {
+            last_batch_nodes.clear();
+            last_batch_result.clear();
+            while( !mQueue.empty() ) {
+                auto node = mQueue.front();
+                last_batch_nodes.push_back( node );
+                mQueue.pop_front();
+            }
+            if (!use_multi_thread) {
+                for(auto& node: last_batch_nodes) {
+                    node->compute();
+                    last_batch_result.push_back( node->getValue() );
+                    if( node->isOutputNode() ) {
+                        mOutputInfo.push_back(make_pair(mInverseNodeMap.at(node), node->getValue()));
+                    }
+                }
+            } else {
+                std::vector<std::thread> last_batch_threads;
+                for(auto& node: last_batch_nodes) {
+                    std::thread t([&node](){ node->compute();});
+                    last_batch_threads.push_back(std::move(t));
+                }
+                for( auto& t : last_batch_threads ) {
+                    t.join();
+                }
+                for( auto& node : last_batch_nodes ) {
+                    last_batch_result.push_back( node->getValue() );
+                    if( node->isOutputNode() ) {
+                        mOutputInfo.push_back(make_pair(mInverseNodeMap.at(node), node->getValue()));
+                    }
+                }
+            }
+        }
+        mDirty = false;
+        
+        for(const auto&[node_id, content]: mOutputInfo) {
+            mOutput.push_back( content );
+        }
+        return mOutput;
     }
 
-    // virtual void onReady( const std::shared_ptr<Node>& node ) const override {
     virtual void onReady( Node* node ) const override {
         mQueue.push_back( node );
     }

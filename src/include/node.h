@@ -38,6 +38,11 @@ public:
     auto getListeners() const {
         return mListeners;
     }
+    
+    // NOTE: there will always be one listener, which is the DAG! If the node is in a DAG
+    virtual bool isOutputNode() const {
+        return getListeners().size() == 0;
+    }
 
     virtual ~Node() {}
 
@@ -89,6 +94,11 @@ public:
         // std::transform( inputs.begin(), inputs.end(), 
         //                std::back_inserter( mInputStrs ),
         //                []( const auto& input ) { return input->getValue(); });
+    }
+
+    // NOTE: DAG will always subscribe to an operator node
+    virtual bool isOutputNode() const override {
+        return getListeners().size() == 1;
     }
 
     virtual void compute() const override {
