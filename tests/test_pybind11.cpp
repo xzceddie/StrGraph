@@ -4,6 +4,7 @@
 #include <pybind11/functional.h>
 #include <functional>
 #include <iostream>
+#include <string>
 
 namespace py = pybind11;
 
@@ -34,6 +35,13 @@ int MyInterface::performOperation(int value) {
     return mCallBack(value);
 }
 
+
+using CallBackStrVec = std::function<std::string(const std::vector<std::string>&)>;
+std::string processStrings(const CallBackStrVec& callback) {
+    const std::vector<std::string> strings = { "Hello", "World", "from", "C++" };
+    return callback(strings);
+}
+
 PYBIND11_MODULE(example, m) {
     m.doc() = "pybind11 example plugin"; // optional module docstring
     m.def("add", &add, "A function that adds two numbers");
@@ -43,5 +51,8 @@ PYBIND11_MODULE(example, m) {
         .def(py::init<>())
         .def("setCallback", &MyInterface::setCallback)
         .def("performOperation", &MyInterface::performOperation);
+
+
+    m.def("process_strings", &processStrings, "Function that accepts a call back function to process strings");
 }
 
