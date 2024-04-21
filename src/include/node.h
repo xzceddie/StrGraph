@@ -9,6 +9,9 @@
 #include <memory>
 #include <iostream>
 #include <src/include/node_listener.h>
+#include <functional>
+
+using OpFunc = std::function<std::string(const std::vector<std::string>&)>;
 
 namespace StrGraph {
 
@@ -65,15 +68,16 @@ public:
 }; // class InputNode
 
 
-template <typename OpType>
+// template <typename OpType>
 class OperatorNode: public Node {
     std::string mOutput;
     std::vector<std::weak_ptr<Node>> mInputs;
     mutable std::vector<std::string> mInputStrs;
-    OpType mOp;
+    // OpType mOp;
+    OpFunc mOp;
 
 public:
-    OperatorNode( const std::vector<std::shared_ptr<Node>>& inputs, const OpType& op )
+    OperatorNode( const std::vector<std::shared_ptr<Node>>& inputs, const OpFunc& op )
     : mOp( op ) {
         for( auto& node : inputs ) {
             mInputs.push_back( node );

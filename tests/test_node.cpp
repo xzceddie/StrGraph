@@ -13,7 +13,7 @@ TEST_CASE( "test_node", "[test_node concat]" ) {
         return std::accumulate(inputs.begin(), inputs.end(), std::string());
     };
 
-    const OperatorNode<decltype( ConcatOp )>
+    const OperatorNode
         op_node{ std::vector<std::shared_ptr<Node>>{ inode1, inode2 }, ConcatOp } ;
     op_node.compute();
     REQUIRE( op_node.getValue() == "Hello World " );
@@ -43,7 +43,7 @@ TEST_CASE( "test_node", "[test_node repeat5]" ) {
         return RepeatOpImpl( input[0], 5 );
     };
 
-    const OperatorNode<decltype( RepeatOp5 )>
+    const OperatorNode
         op_node{ std::vector<std::shared_ptr<Node>>{ inode1 }, RepeatOp5 } ;
     op_node.compute();
     REQUIRE( op_node.getValue() == "Hello Hello Hello Hello Hello " );

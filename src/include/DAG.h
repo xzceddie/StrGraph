@@ -42,11 +42,11 @@ public:
         return mInputNodes;
     }
 
-    template<typename OpType>
-    int addOperatorNode( const std::vector<std::shared_ptr<Node>>& parent_nodes, const OpType& op ) {
+    // template<typename OpType>
+    int addOperatorNode( const std::vector<std::shared_ptr<Node>>& parent_nodes, const OpFunc& op ) {
         int id = mNodeIds.size();
         mNodeIds.insert( id );
-        mNodeMap[id] = std::make_shared<OperatorNode<OpType>>( parent_nodes, op );
+        mNodeMap[id] = std::make_shared<OperatorNode>( parent_nodes, op );
         for(auto& ele: parent_nodes) {
             mNodeMap[id]->subscribe( ele );
         }
@@ -54,8 +54,8 @@ public:
         return id;
     }
 
-    template<typename OpType>
-    int addOperatorNode( const std::vector<int>& parent_nodes, const OpType& op ) {
+    // template<typename OpType>
+    int addOperatorNode( const std::vector<int>& parent_nodes, const OpFunc& op ) {
         std::vector<std::shared_ptr<Node>> nodes;
         for( int i : parent_nodes ) {
             if( mNodeMap.find(i) != mNodeMap.end() )
