@@ -10,6 +10,8 @@
 #include <iostream>
 #include <src/include/node_listener.h>
 #include <functional>
+#include <thread>
+#include <src/include/utils.h>
 
 using OpFunc = std::function<std::string(const std::vector<std::string>&)>;
 
@@ -50,7 +52,7 @@ public:
         mResult = res_str;
     }
 
-    virtual void compute() const;
+    virtual void compute( const int verbose_level = 0 ) const;
 
     bool isReady() const {
         return mReadyCount == getSubCount();
@@ -101,7 +103,11 @@ public:
         return getListeners().size() == 1;
     }
 
-    virtual void compute() const override {
+    virtual void compute( const int verbose_level = 0 ) const override {
+        if (verbose_level > 0) {
+            std::lock_guard<std::mutex> lock( utils::StdOutMutexHolder::getInstance()->getMutex() );
+            std::cout << "Thread ID: " << std::this_thread::get_id() << std::endl;
+        }
         std::vector<std::shared_ptr<Node>> tmp_parents;
         for( auto& input : mInputs ) {
             if( auto p = input.lock() ) {

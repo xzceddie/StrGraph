@@ -107,7 +107,7 @@ public:
     }
 
 
-    std::vector<std::string> doCompute(const bool use_multi_thread = false) const {
+    std::vector<std::string> doCompute(const bool use_multi_thread = false, int verbose_level = 0) const {
         if( !mDirty )
             return mOutput;
 
@@ -128,7 +128,7 @@ public:
             }
             if (!use_multi_thread) {
                 for(auto& node: last_batch_nodes) {
-                    node->compute();
+                    node->compute(verbose_level);
                     last_batch_result.push_back( node->getValue() );
                     if( node->isOutputNode() ) {
                         mOutputInfo.push_back(make_pair(mInverseNodeMap.at(node), node->getValue()));
@@ -137,7 +137,7 @@ public:
             } else {
                 std::vector<std::thread> last_batch_threads;
                 for(auto& node: last_batch_nodes) {
-                    std::thread t([&node](){ node->compute();});
+                    std::thread t([&node, verbose_level](){ node->compute(verbose_level);});
                     last_batch_threads.push_back(std::move(t));
                 }
                 for( auto& t : last_batch_threads ) {

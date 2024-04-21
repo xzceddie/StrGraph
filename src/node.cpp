@@ -8,7 +8,11 @@ void StrGraph::NodeListener::subscribe( const std::shared_ptr<StrGraph::Node>& l
 }
 
 
-void StrGraph::Node::compute() const {
+void StrGraph::Node::compute( const int verbose_level ) const {
+    if (verbose_level > 0) {
+        std::lock_guard<std::mutex> lock( utils::StdOutMutexHolder::getInstance()->getMutex() );
+        std::cout << "Thread ID: " << std::this_thread::get_id() << std::endl;
+    }
     for( auto& listener : mListeners ) {
         listener->onDoneComputing();
     }

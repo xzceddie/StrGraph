@@ -20,7 +20,7 @@ PYBIND11_MODULE(pyStrGraph, m) {
         .def( "touch", &StrGraph::DAG::touch )
         .def( "markDirty", &StrGraph::DAG::markDirty )
         .def( "addOperatorNode", &StrGraph::DAG::addOperatorNodeById, py::arg("input_node_ids"), py::arg("operator") )
-        .def( "doCompute", &StrGraph::DAG::doCompute, py::arg("use_multithread"), py::call_guard<py::gil_scoped_release>() )
+        .def( "doCompute", &StrGraph::DAG::doCompute, py::arg("use_multithread"), py::arg("verbose_level"), py::call_guard<py::gil_scoped_release>() )
         .def_property_readonly_static("__doc__",
             [](py::object) {
                 return
