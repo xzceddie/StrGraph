@@ -1,8 +1,10 @@
 # StrGraph
 
 `StrGraph` is a library that aims for carrying out string manipulations modeled by directed acyclic graphs (DAGs);
-`StrGraph` has both Python and C++ bindings. One can use either language to build out the DAGs and carry out the computation.
-check `doc/reference.md` for detailed explanation.
+
+`StrGraph` has both Python and C++ bindings. One can use either language to build out the DAGs and carry out the computation;
+
+Check `doc/reference.md` for detailed explanation;
 
 ## Features
 1. Lazy evaluation
@@ -20,8 +22,10 @@ check `doc/reference.md` for detailed explanation.
 ## Download
 ```bash
 git clone --recursive https://github.com/xzceddie/StrGraph.git
+git checkout v1.0
 ```
 The `--recursive` flag is needed for cloning the `Catch2` dependency.
+
 ## Build
 starting at root level of the repository:
 ```bash
@@ -30,14 +34,16 @@ cd build
 cmake ../
 make -j8 
 ```
-Make sure `pybind11` is installed
+Make sure to use `C++17` compatible compilers to make it work.
+Also make sure `pybind11` is installed
 
 ## Run Test
+starting at root level of the repository:
 ```bash
 cd build/tests/
 ctest
 ```
-Also checkout `tests/showcase.ipynb`
+Also checkout `tests/showcase.ipynb` after compilation is done.
 
 ## Dependencies
 - `pybind11`
