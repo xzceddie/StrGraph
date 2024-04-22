@@ -1,6 +1,43 @@
-# StrGraph  (TODO: Lot of stuff needs to be fixed)
+# StrGraph
 
+`StrGraph` is a library that aims for carrying out string manipulations modeled by directed acyclic graphs (DAGs);
+`StrGraph` has both Python and C++ bindings. One can use either language to build out the DAGs and carry out the computation.
+check `doc/reference.md` for detailed explanation.
+
+## Features
+1. Lazy evaluation
+    - The graph is firstly constructed. Only after `StrGraph::DAG::doCompute()/pyStrGraph.DAG.doCompute()` being called will the evaluation be carried out.
+1. Versatility
+    - A handful of predefined operators are available and can be used in after imported
+    - One can always define its own operator in Python or C++, as long as it conforms to the interface
+1. Idempotency
+    - After constructing a `DAG` and call `doCompute()`. It is guaranteened that calling it again will yield the identical result.
+    - If the graph is integral, the second call will directly read out the result rather than carry out the computation all over again.
+1. Multithread supported
+    - Just call `StrGraph::DAG::doCompute()/pyStrGraph.DAG.doCompute()` with the argument `use_multithread` set to true.
+    - Please refer to the last example in `tests/showcase.ipynb`.
+
+## Download
+```bash
+git clone --recursive https://github.com/xzceddie/StrGraph.git
+```
+The `--recursive` flag is needed for cloning the `Catch2` dependency.
 ## Build
+starting at root level of the repository:
+```bash
+mkdir build
+cd build
+cmake ../
+make -j8 
+```
+Make sure `pybind11` is installed
+
+## Run Test
+```bash
+cd build/tests/
+ctest
+```
+Also checkout `tests/showcase.ipynb`
 
 ## Dependencies
 - `pybind11`
@@ -35,9 +72,3 @@
 
 - `Catch2`
     - Just included for testing. It is included as a git submodule; Supplying `--recursive` in `git clone` command suffice.
-
-## Features
-1. Idempotent
-    - After constructing a `DAG` and call `doCompute()`. It is guaranteened that calling it again will yield the identical result.
-2. Multithread supported
-    - Just call `StrGraph::DAG::doCompute(true)` in C++.
