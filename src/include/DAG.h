@@ -109,6 +109,9 @@ public:
 
 
     std::vector<std::string> doCompute(const bool use_multi_thread = false, int verbose_level = 0) const {
+        if (verbose_level > 0) {
+            std::cout << "--> Start computing..., verbose_level: " << verbose_level << std::endl;
+        }
         if( !mDirty )
             return mOutput;
 
@@ -136,6 +139,9 @@ public:
                     }
                 }
             } else {
+                if (verbose_level > 0) {
+                    std::cout << "---> Firing up multi-threads: " << std::endl;
+                }
                 std::vector<std::thread> last_batch_threads;
                 for(auto& node: last_batch_nodes) {
                     std::thread t([&node, verbose_level](){ node->compute(verbose_level);});
