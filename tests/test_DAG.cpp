@@ -204,3 +204,19 @@ TEST_CASE( "test_dag", "[test_complex2]" ) {
     REQUIRE( res == std::vector<std::string> { "a b d", "a c | a c" } );
     REQUIRE( res2 == std::vector<std::string> { "a b d", "a c | a c" } );
 }
+
+TEST_CASE( "test_dag", "[test_streaming_operator]" ) {
+    DAG dag{ std::vector<std::string>{"Hello", "World", "Str", "Graph"} };
+
+    dag << std::pair<std::vector<int>, OpFunc>{std::vector<int>{0, 1}, ConcatOperator(" ")}
+        << std::pair<std::vector<int>, OpFunc>{std::vector<int>{4, 2}, ConcatOperator(" ")}
+        << std::pair<std::vector<int>, OpFunc>{std::vector<int>{5, 3}, ConcatOperator(" ")}
+    ;
+
+    auto res = dag.doCompute(false );
+    dag.touch();
+    auto res2 = dag.doCompute( true ); // indempotence && multithread
+
+    REQUIRE( res == std::vector<std::string> { "Hello World Str Graph"} );
+    REQUIRE( res2 == std::vector<std::string> { "Hello World Str Graph"} );
+}

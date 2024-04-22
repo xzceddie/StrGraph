@@ -74,7 +74,7 @@ public:
         touch();
     }
 
-    // if is integrated, can query the result of any node
+    // if is integral, can query the result of any node
     bool isIntegral() const {
         return !mDirty;
     }
