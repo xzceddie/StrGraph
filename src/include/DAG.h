@@ -75,7 +75,7 @@ public:
     }
 
     // if is integrated, can query the result of any node
-    bool isIntegrated() const {
+    bool isIntegral() const {
         return !mDirty;
     }
 
@@ -96,7 +96,6 @@ public:
         return id;
     }
 
-    // template<typename OpType>
     int addOperatorNodeById( const std::vector<int>& parent_nodes, const OpFunc& op ) {
         std::vector<std::shared_ptr<Node>> nodes;
         for( int i : parent_nodes ) {
@@ -107,6 +106,24 @@ public:
         return addOperatorNode( nodes, op );
     }
 
+    int getLastNodeId() const {
+        return mNodeIds.size() - 1;
+    }
+
+    DAG& operator<< ( const std::pair<std::vector<int>, OpFunc>& next_node_info ) {
+        this->addOperatorNodeById( next_node_info.first, next_node_info.second );
+        return *this;
+    }
+
+    std::string queryNodeValue( const int node_id ) const {
+        if( !isIntegral() ) {
+            std::cerr<< "WARNING: DAG is not integrated, value could be wrong. Call doCompute() first." << std::endl;
+        }
+        if( mNodeMap.find(node_id) == mNodeMap.end() ) {
+            throw std::runtime_error( "Node not found" );
+        }
+        return mNodeMap.at(node_id)->getValue();
+    }
 
     std::vector<std::string> doCompute(const bool use_multi_thread = false, int verbose_level = 0) const {
         if (verbose_level > 0) {

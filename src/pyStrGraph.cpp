@@ -19,12 +19,24 @@ PYBIND11_MODULE(pyStrGraph, m) {
         .def( py::init<const std::vector<std::string>&>() )
         .def( "touch", &StrGraph::DAG::touch )
         .def( "markDirty", &StrGraph::DAG::markDirty )
+        .def( "isIntegral", &StrGraph::DAG::isIntegral )
         .def( "addOperatorNode", &StrGraph::DAG::addOperatorNodeById, py::arg("input_node_ids"), py::arg("operator") )
+        .def( "getLastNode", &StrGraph::DAG::getLastNodeId )
+        .def( "__lshift__", &StrGraph::DAG::operator<<, py::arg("recipe")  )
+        .def( "queryNodeValue", &StrGraph::DAG::queryNodeValue )
         .def( "doCompute", &StrGraph::DAG::doCompute, py::arg("use_multithread"), py::arg("verbose_level"), py::call_guard<py::gil_scoped_release>() )
         .def_property_readonly_static("__doc__",
             [](py::object) {
                 return
-                    "This is the entry point for constructing the DAG, input list of str as input nodes";
+                    "This is the entry point for constructing the DAG, input list of str as input nodes"
+                    "\tmethod addOperatorNode: expect input_node_ids (List[int]) and operator. Return the id if the new node. The new id will be automaticalluy assigned as the 1 plus the current largest id"
+                    "\tmethod touch: make the DAG dirty such that subsequent doCompute() call will actually compute the DAG all over again"
+                    "\tmethod markDirty: alias for touch"
+                    "\tmethod isIntegral: return True if the DAG is integral (not dirty)"
+                    "\tmethod __lshift__: expect tuple of input_node_ids (List[int]) and operator, return the updated DAG"
+                    "\tmethod getLastNode: return the last node id has been added to the DAG"
+                    "\tmethod queryNodeValue: input the node id, return the value of the node. Cautious to use this method if DAG is not integral (dirty)"
+                    ;
             })
     ;
 

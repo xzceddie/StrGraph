@@ -55,7 +55,9 @@ public:
     }
 
     std::string operator()( const std::vector<std::string>& inputs ) {
-        assert( inputs.size() == 1 );
+        if (inputs.size() != 1 ) {
+            throw std::runtime_error("Invalid number of inputs to repeat operator");
+        }
         const std::string& orig_piece = inputs.front();
         std::string res;
         if( mCount == 0 )
