@@ -121,7 +121,9 @@ public:
     {
     }
     std::string operator()( const std::vector<std::string>& inputs ) {
-        assert( inputs.size() == 1 );
+        if ( inputs.size() != 1) {
+            throw std::runtime_error( "RotateOperator expects exactly one string" );
+        }
         const std::string& input_str = inputs.front();
         if ( mCount == 0)
             return input_str;
@@ -133,6 +135,34 @@ public:
             std::rotate_copy( input_str.begin(), input_str.end() - mCount, input_str.end(), std::back_inserter(res) );
         return res;
     }
+}; // class InsertOperator
+
+// Make every character after a whitespace uppercase
+class CapitalizeOperator {
+public:
+    CapitalizeOperator()
+    {}
+
+    std::string operator()( const std::vector<std::string>& inputs ) {
+        if ( inputs.size() != 1) {
+            throw std::runtime_error( "CapitalizeOperator expects exactly one string" );
+        }
+        std::string res = inputs.front();
+        if( res.size() == 0 ) {
+            return res;
+        }
+        
+        if(res.at(0) != ' ') {
+            res.at(0) = toupper(res.at(0));
+        }
+        for(int i = 1; i < res.size(); ++i) {
+            if( res.at(i - 1) == ' ' && res.at(i) != ' ' ) {
+                res.at(i) = toupper(res.at(i));
+            }
+        }
+        return res;
+    }
+
 }; // class InsertOperator
 
 

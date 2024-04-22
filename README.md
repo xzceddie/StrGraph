@@ -8,10 +8,21 @@
     ```
     pip3 install pybind11
     ```
-    or
+    OR
     ```
     conda install -c conda-forge pybind11
     ```
+
+    - **NOTE**:
+        In case `cmake` still does not find `pybind11`, try to do:
+        ```
+        pip3 install pybind11[global]
+        ```
+        or 
+        ```
+        pip3 install pybind11\[global\]
+        ```
+        whichever works
 - `cmake`
     - to install (MacOS):
     ```

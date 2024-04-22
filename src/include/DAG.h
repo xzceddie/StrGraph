@@ -50,11 +50,11 @@ public:
         }
     }
 
-    static DAG create( const std::vector<std::string>& input_strings ) {
-        return DAG( input_strings );
-    }
-    DAG( DAG&& other ) = default;
-    DAG( const DAG& other ) = default;
+    // static DAG create( const std::vector<std::string>& input_strings ) {
+    //     return DAG( input_strings );
+    // }
+    // DAG( DAG&& other ) = default;
+    // DAG( const DAG& other ) = default;
 
     std::vector<std::shared_ptr<Node>> getInputs() const {
         return mInputNodes;
@@ -66,6 +66,8 @@ public:
         for(auto& [nodeId, node]: mNodeMap) {
             node -> resetReadyCount();
         }
+        mOutput.clear();
+        mOutputInfo.clear();
     }
 
     void markDirty() { // alias
@@ -82,7 +84,6 @@ public:
         touch();
     }
 
-    // template<typename OpType>
     int addOperatorNode( const std::vector<std::shared_ptr<Node>>& parent_nodes, const OpFunc& op ) {
         int id = mNodeIds.size();
         mNodeIds.insert( id );
