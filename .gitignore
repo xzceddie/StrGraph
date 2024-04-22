@@ -34,3 +34,4 @@ build/
 *.cache*
 .vscode/
 *.ipynb_checkpoints/
+*.svg
