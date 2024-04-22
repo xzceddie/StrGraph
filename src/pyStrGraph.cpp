@@ -28,12 +28,25 @@ PYBIND11_MODULE(pyStrGraph, m) {
             })
     ;
 
+    py::class_<StrGraph::Operator>( m, "Operator" )
+        .def( py::init<const OpFunc&>() )
+        .def( "__call__", &StrGraph::Operator::operator() )
+        .def_property_readonly_static("__doc__",
+            [](py::object /* self */) {
+                return "This is the operator you can pass in a Python call back function for the computation logic"
+                       "input : func (List[str]) -> str"
+                       "return: str"
+                ;
+            })
+    ;
+
     py::class_<StrGraph::ConcatOperator>( m, "ConcatOperator" )
         .def( py::init<const std::string&>() )
         .def( "__call__", &StrGraph::ConcatOperator::operator() )
         .def_property_readonly_static("__doc__",
             [](py::object /* self */) {
-                return "Concatenate input strings, pass in a delimiter string to represent the delimiter";
+                return "Concatenate input strings, pass in a delimiter string to represent the delimiter"
+                ;
             })
     ;
 
@@ -42,7 +55,8 @@ PYBIND11_MODULE(pyStrGraph, m) {
         .def( "__call__", &StrGraph::RepeatOperator::operator() )
         .def_property_readonly_static("__doc__",
             [](py::object /* self */) {
-                return "Repeat input strings for given times, pass in (times, delimiter)";
+                return "Repeat input strings for given times, pass in (times, delimiter)"
+                ;
             })
     ;
 
@@ -51,7 +65,8 @@ PYBIND11_MODULE(pyStrGraph, m) {
         .def( "__call__", &StrGraph::ToUpperOperator::operator() )
         .def_property_readonly_static("__doc__",
             [](py::object /* self */) {
-                return "Make the input string all upper case";
+                return "Make the input string all upper case"
+                ;
             })
     ;
 
@@ -60,7 +75,18 @@ PYBIND11_MODULE(pyStrGraph, m) {
         .def( "__call__", &StrGraph::ToLowerOperator::operator() )
         .def_property_readonly_static("__doc__",
             [](py::object /* self */) {
-                return "Make the input string all lower case";
+                return "Make the input string all lower case"
+                ;
+            })
+    ;
+
+    py::class_<StrGraph::CapitalizeOperator>( m, "CapitalizeOperator" )
+        .def( py::init<>() )
+        .def( "__call__", &StrGraph::CapitalizeOperator::operator() )
+        .def_property_readonly_static("__doc__",
+            [](py::object) {
+                return "Make every character after a whitespace uppercase";
+                ;
             })
     ;
 
@@ -69,7 +95,8 @@ PYBIND11_MODULE(pyStrGraph, m) {
         .def( "__call__", &StrGraph::InsertOperator::operator() )
         .def_property_readonly_static("__doc__",
             [](py::object /* self */) {
-                return "Insert delimiters into the original string at evenly spaced indices, pass in (interval, delimiter)";
+                return "Insert delimiters into the original string at evenly spaced indices, pass in (interval, delimiter)"
+                ;
             })
     ;
     
@@ -78,7 +105,8 @@ PYBIND11_MODULE(pyStrGraph, m) {
         .def( "__call__", &StrGraph::RotateOperator::operator() )
         .def_property_readonly_static("__doc__",
             [](py::object /* self */) {
-                return "Rotate the string to the right (positive) or left (negative) by the given amount";
+                return "Rotate the string to the right (positive) or left (negative) by the given amount"
+                ;
             })
     ;
 }

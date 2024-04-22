@@ -10,6 +10,18 @@ namespace StrGraph {
 
 using OpFunc = std::function<std::string(const std::vector<std::string>&)>;
 
+class Operator {
+    OpFunc mFunc;
+public:
+    Operator( const OpFunc& func )
+    : mFunc{ func }
+    {}
+
+    std::string operator()( const std::vector<std::string>& inputs ) {
+        return mFunc( inputs );
+    }
+}; // class Operator
+
 class ConcatOperator {
     std::string mDelim;
 public:
