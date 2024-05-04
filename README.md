@@ -78,3 +78,8 @@ Also checkout `tests/showcase.ipynb` after compilation is done.
 
 - `Catch2`
     - Just included for testing. It is included as a git submodule; Supplying `--recursive` in `git clone` command suffice.
+
+## TODO
+1. Add support for defining `InputNode/OperatorNode` first and then connect them together;
+2. Add serialize/deserialize functionalities;
+3. Add out-of-memory computation support for big Graphs;
